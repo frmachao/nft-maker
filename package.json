@@ -1,7 +1,12 @@
 {
   "name": "nft-maker-web",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "A decentralized application for creating and minting NFT collections on Ethereum",
   "private": true,
+  "author": {
+    "name": "Your Name",
+    "url": "https://github.com/frmachao"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
