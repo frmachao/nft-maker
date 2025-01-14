@@ -20,7 +20,7 @@ A decentralized application (dApp) that allows users to create and mint their ow
 
 ## Environment Variables
 
-Create a `.env.local` file in the root directory with:
+Copy `.env.example` to `.env` and fill in your values:
 
 ```bash
 NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_wallet_connect_project_id
