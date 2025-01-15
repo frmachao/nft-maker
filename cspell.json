@@ -1,0 +1,8 @@
+{
+  "ignorePaths": [
+    ".env",
+    ".env.*",
+    "**/.env",
+    "**/.env.*"
+  ]
+} 

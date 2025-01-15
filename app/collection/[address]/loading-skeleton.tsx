@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 
 export default function LoadingSkeleton() {
     return (
-      <div className="container min-w-full min-h-screen flex justify-center p-8">
+      <div className="mx-auto container max-w-5xl min-h-screen p-8">
         <div className="grid gap-8">
           <Skeleton className="aspect-video w-full" />
           <div className="grid gap-6">

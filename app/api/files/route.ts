@@ -1,16 +1,27 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { pinata } from "@/lib/server/utils"
+import { pinata } from "@/lib/server/utils";
 
 export async function POST(request: NextRequest) {
-  if (!request.body) {
+  // 验证密码
+  const password = request.headers.get("Upload-Password");
+  const validPasswords = process.env.UPLOAD_PASSWORD?.split(",") || [];
+
+  if (!password || !validPasswords.includes(password)) {
     return NextResponse.json(
-      { error: "No file uploaded" },
-      { status: 400 }
+      { error: "Invalid upload password" },
+      { status: 401 }
     );
   }
 
-  const contentLength = parseInt(request.headers.get('content-length') || '0', 10);
-  const MAX_SIZE = 1 * 1024 * 1024; // 1MB in bytes 
+  if (!request.body) {
+    return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+  }
+
+  const contentLength = parseInt(
+    request.headers.get("content-length") || "0",
+    10
+  );
+  const MAX_SIZE = 1 * 1024 * 1024; // 1MB in bytes
 
   if (contentLength > MAX_SIZE) {
     return NextResponse.json(
@@ -22,11 +33,11 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.formData();
     const file: File | null = data.get("file") as unknown as File;
-    const uploadData = await pinata.upload.file(file)
-    const url = await pinata.gateways.convert(uploadData.IpfsHash)
+    const uploadData = await pinata.upload.file(file);
+    const url = await pinata.gateways.convert(uploadData.IpfsHash);
     return NextResponse.json(url, { status: 200 });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

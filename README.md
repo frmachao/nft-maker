@@ -2,6 +2,8 @@
 
 A decentralized application (dApp) that allows users to create and mint their own NFT collections on Ethereum. Built with Next.js, RainbowKit, and Wagmi.
 
+![image](./public/home.png)
+
 ## Features
 
 - Create NFT collections with customizable parameters
@@ -26,6 +28,7 @@ Copy `.env.example` to `.env` and fill in your values:
 NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_wallet_connect_project_id
 NEXT_PUBLIC_GATEWAY_URL=your_pinata_gateway_url
 PINATA_JWT=your_pinata_jwt
+UPLOAD_PASSWORD=your_password_here
 ```
 
 ## Getting Started
