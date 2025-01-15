@@ -1,69 +1,100 @@
+import { parseAbiItem } from "viem";
+const pausedAbi = parseAbiItem(
+  "function paused() external view returns (bool)"
+);
+// 白名单管理相关的 ABI
+const whitelistAbi = {
+  functions: {
+    addToWhitelist: parseAbiItem(
+      "function addToWhitelist(address[] calldata addresses) external"
+    ),
+    removeFromWhitelist: parseAbiItem(
+      "function removeFromWhitelist(address[] calldata addresses) external"
+    ),
+    // 查询白名单状态
+    whitelist: parseAbiItem(
+      "function whitelist(address) external view returns (bool)"
+    ),
+    // 查询白名单模式
+    whitelistOnly: parseAbiItem(
+      "function whitelistOnly() external view returns (bool)"
+    ),
+  },
+  events: {
+    whitelistAdded: parseAbiItem("event WhitelistAdded(address[] addresses)"),
+    whitelistRemoved: parseAbiItem(
+      "event WhitelistRemoved(address[] addresses)"
+    ),
+  },
+} as const;
 export const NFTCollectionABI = [
+  pausedAbi,
+  whitelistAbi.functions.addToWhitelist,
+  whitelistAbi.functions.removeFromWhitelist,
+  whitelistAbi.functions.whitelist,
+  whitelistAbi.functions.whitelistOnly,
+  whitelistAbi.events.whitelistAdded,
+  whitelistAbi.events.whitelistRemoved,
   {
     inputs: [
       {
         internalType: "string",
         name: "_name",
-        type: "string"
+        type: "string",
       },
       {
         internalType: "string",
         name: "_symbol",
-        type: "string"
+        type: "string",
       },
       {
         internalType: "string",
         name: "initDescription",
-        type: "string"
+        type: "string",
       },
       {
         internalType: "uint256",
         name: "_maxSupply",
-        type: "uint256"
+        type: "uint256",
       },
       {
         internalType: "uint256",
         name: "_mintPrice",
-        type: "uint256"
+        type: "uint256",
       },
       {
         internalType: "address",
         name: "initialOwner",
-        type: "address"
+        type: "address",
       },
       {
         internalType: "string",
         name: "imageUrl",
-        type: "string"
-      },
-      {
-        internalType: "bool",
-        name: "_whitelistOnly",
-        type: "bool"
+        type: "string",
       },
       {
         internalType: "address[]",
         name: "initialWhitelist",
-        type: "address[]"
+        type: "address[]",
       },
       {
         internalType: "uint256",
         name: "_maxMintsPerWallet",
-        type: "uint256"
+        type: "uint256",
       },
       {
         internalType: "uint256",
         name: "_mintStartTime",
-        type: "uint256"
+        type: "uint256",
       },
       {
         internalType: "uint256",
         name: "_mintEndTime",
-        type: "uint256"
-      }
+        type: "uint256",
+      },
     ],
     stateMutability: "nonpayable",
-    type: "constructor"
+    type: "constructor",
   },
   {
     inputs: [],
@@ -72,11 +103,11 @@ export const NFTCollectionABI = [
       {
         internalType: "string",
         name: "",
-        type: "string"
-      }
+        type: "string",
+      },
     ],
     stateMutability: "view",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [],
@@ -85,11 +116,11 @@ export const NFTCollectionABI = [
       {
         internalType: "string",
         name: "",
-        type: "string"
-      }
+        type: "string",
+      },
     ],
     stateMutability: "view",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [],
@@ -98,11 +129,11 @@ export const NFTCollectionABI = [
       {
         internalType: "uint256",
         name: "",
-        type: "uint256"
-      }
+        type: "uint256",
+      },
     ],
     stateMutability: "view",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [],
@@ -111,18 +142,18 @@ export const NFTCollectionABI = [
       {
         internalType: "uint256",
         name: "",
-        type: "uint256"
-      }
+        type: "uint256",
+      },
     ],
     stateMutability: "view",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [],
     name: "mint",
     outputs: [],
     stateMutability: "payable",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [],
@@ -131,11 +162,11 @@ export const NFTCollectionABI = [
       {
         internalType: "uint256",
         name: "",
-        type: "uint256"
-      }
+        type: "uint256",
+      },
     ],
     stateMutability: "view",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [],
@@ -144,11 +175,11 @@ export const NFTCollectionABI = [
       {
         internalType: "uint256",
         name: "",
-        type: "uint256"
-      }
+        type: "uint256",
+      },
     ],
     stateMutability: "view",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [],
@@ -157,69 +188,69 @@ export const NFTCollectionABI = [
       {
         internalType: "uint256",
         name: "",
-        type: "uint256"
-      }
+        type: "uint256",
+      },
     ],
     stateMutability: "view",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [
       {
         internalType: "address",
         name: "",
-        type: "address"
-      }
+        type: "address",
+      },
     ],
     name: "mintsPerWallet",
     outputs: [
       {
         internalType: "uint256",
         name: "",
-        type: "uint256"
-      }
+        type: "uint256",
+      },
     ],
     stateMutability: "view",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [],
     name: "pause",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [
       {
         internalType: "address",
         name: "wallet",
-        type: "address"
-      }
+        type: "address",
+      },
     ],
     name: "remainingMints",
     outputs: [
       {
         internalType: "uint256",
         name: "",
-        type: "uint256"
-      }
+        type: "uint256",
+      },
     ],
     stateMutability: "view",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [
       {
         internalType: "uint256",
         name: "_newPrice",
-        type: "uint256"
-      }
+        type: "uint256",
+      },
     ],
     name: "setMintPrice",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [],
@@ -228,38 +259,25 @@ export const NFTCollectionABI = [
       {
         internalType: "uint256",
         name: "",
-        type: "uint256"
-      }
+        type: "uint256",
+      },
     ],
     stateMutability: "view",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [],
     name: "unpause",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    inputs: [],
-    name: "whitelistOnly",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool"
-      }
-    ],
-    stateMutability: "view",
-    type: "function"
+    type: "function",
   },
   {
     inputs: [],
     name: "withdraw",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function"
+    type: "function",
   },
   {
     anonymous: false,
@@ -268,23 +286,23 @@ export const NFTCollectionABI = [
         indexed: true,
         internalType: "address",
         name: "minter",
-        type: "address"
+        type: "address",
       },
       {
         indexed: true,
         internalType: "uint256",
         name: "tokenId",
-        type: "uint256"
+        type: "uint256",
       },
       {
         indexed: false,
         internalType: "uint256",
         name: "mintPrice",
-        type: "uint256"
-      }
+        type: "uint256",
+      },
     ],
     name: "NFTMinted",
-    type: "event"
+    type: "event",
   },
   {
     inputs: [],
@@ -292,5 +310,5 @@ export const NFTCollectionABI = [
     outputs: [{ type: "string", name: "" }],
     stateMutability: "view",
     type: "function",
-  }
-] as const; 
+  },
+] as const;

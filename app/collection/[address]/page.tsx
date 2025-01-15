@@ -53,6 +53,11 @@ export default function CollectionDetail() {
         abi: NFTCollectionABI,
         functionName: 'mintEndTime',
       },
+      {
+        address: address as `0x${string}`,
+        abi: NFTCollectionABI,
+        functionName: 'paused',
+      },
     ],
   })
 
@@ -109,6 +114,7 @@ export default function CollectionDetail() {
     mintPrice,
     mintStartTime,
     mintEndTime,
+    paused,
   ] = data?.map(result => result.result) ?? []
 
   const isDisabled = useMemo(() => {
@@ -122,8 +128,8 @@ export default function CollectionDetail() {
     const hasExpired = Number(mintEndTime) > 0 && 
                       Number(mintEndTime) < now
 
-    return isWritePending || isConfirming || notStarted || hasExpired
-  }, [mintStartTime, mintEndTime, isWritePending, isConfirming])
+    return isWritePending || isConfirming || notStarted || hasExpired|| paused
+  }, [mintStartTime, mintEndTime, isWritePending, isConfirming, paused])
 
   const getButtonText = () => {
     if (!isConnected) return "Connect Wallet"
@@ -206,6 +212,14 @@ export default function CollectionDetail() {
                 <CardTitle>Mint Period</CardTitle>
               </CardHeader>
               <MintPeriod startTime={mintStartTime as bigint} endTime={mintEndTime as bigint} />
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Paused</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>{paused ? "Yes" : "No"}</p>
+              </CardContent>
             </Card>
           </div>
         </div>

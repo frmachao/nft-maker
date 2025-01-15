@@ -1,78 +1,83 @@
-'use client'
+"use client";
 
-import { useAccount, usePublicClient } from 'wagmi'
-import { contracts, NFTFactoryABI } from "@/config/contracts"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import Link from "next/link"
-import { Stamp } from "lucide-react"
-import { useEffect, useState } from 'react'
-import { decodeEventLog,parseAbiItem } from 'viem'
+import { useAccount, usePublicClient } from "wagmi";
+import { contracts, NFTFactoryABI } from "@/config/contracts";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
+import { Stamp, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
+import { decodeEventLog, parseAbiItem } from "viem";
+import { CollectionManageDialog } from "./collection-manage-dialog"
 
 interface Collection {
-  creator: string
-  collection: string
-  name: string
-  imageUrl: string
+  creator: string;
+  collection: string;
+  name: string;
+  imageUrl: string;
 }
 
 export default function CollectionsList() {
-  const { address } = useAccount()
-  const [collections, setCollections] = useState<Collection[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const publicClient = usePublicClient()
+  const { address } = useAccount();
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const publicClient = usePublicClient();
+  const [selectedCollectionAddress, setSelectedCollectionAddress] = useState<string>()
+  const [manageDialogOpen, setManageDialogOpen] = useState(false)
 
   useEffect(() => {
     async function getCollections() {
-      if (!address || !publicClient) return
+      if (!address || !publicClient) return;
 
       try {
-        setIsLoading(true)
+        setIsLoading(true);
         const logs = await publicClient.getLogs({
           address: contracts.sepolia.NFTFactory,
-          event: parseAbiItem('event CollectionCreated(address indexed creator, address indexed collection, string name, string imageUrl, uint256 maxSupply, uint256 mintPrice, uint256 mintStartTime, uint256 mintEndTime)'),
+          event: parseAbiItem(
+            "event CollectionCreated(address indexed creator, address indexed collection, string name, string imageUrl, uint256 maxSupply, uint256 mintPrice, uint256 mintStartTime, uint256 mintEndTime)"
+          ),
           args: {
-            creator: address
+            creator: address,
           },
           fromBlock: 0n,
-          toBlock: 'latest'
-        })
+          toBlock: "latest",
+        });
 
         const collections = logs.map((log) => {
           const {
-            args: { creator, collection, name, imageUrl }
+            args: { creator, collection, name, imageUrl },
           } = decodeEventLog({
             abi: NFTFactoryABI,
             data: log.data,
             topics: log.topics,
-            eventName: 'CollectionCreated'
-          })
+            eventName: "CollectionCreated",
+          });
 
           return {
             creator,
             collection,
             name,
-            imageUrl
-          }
-        })
+            imageUrl,
+          };
+        });
 
-        setCollections(collections)
+        setCollections(collections);
       } catch (error) {
-        console.error('Failed to fetch collections:', error)
+        console.error("Failed to fetch collections:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
 
-    getCollections()
-  }, [address, publicClient])
+    getCollections();
+  }, [address, publicClient]);
 
-  if (address&&isLoading) {
-    return <LoadingSkeleton />
+  if (address && isLoading) {
+    return <LoadingSkeleton />;
   }
   if (!address) {
-    return <div>Please connect your wallet</div>
+    return <div>Please connect your wallet</div>;
   }
   if (collections.length === 0) {
     return (
@@ -83,21 +88,23 @@ export default function CollectionsList() {
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
-    <div className="mt-8 space-y-4">
+    <div className="mt-8 space-y-4 max-w-full">
       <h2 className="text-2xl font-bold">Your Collections</h2>
-      <div className="grid gap-4">
+      <div className="space-y-4">
         {collections.map((collection) => (
           <Card key={collection.collection}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4">
+          <CardContent className="p-4">
+            <div className="flex flex-wrap gap-4">
+              {/* Top Row: Thumbnail and Info */}
+              <div className="flex items-center gap-4 min-w-[200px]">
                 {/* Thumbnail */}
                 <div className="h-16 w-16 rounded-lg overflow-hidden flex-shrink-0">
-                  <img 
-                    src={collection.imageUrl} 
+                  <img
+                    src={collection.imageUrl}
                     alt={collection.name}
                     className="h-full w-full object-cover"
                   />
@@ -110,28 +117,46 @@ export default function CollectionsList() {
                     {collection.collection}
                   </p>
                 </div>
-
-                {/* Actions */}
-                <div className="flex-shrink-0">
-                  <Button asChild variant="outline" size="sm">
-                    <Link href={`/collection/${collection.collection}`}>
-                      <Stamp className="h-4 w-4 mr-2" />
-                      Mint NFT
-                    </Link>
-                  </Button>
-                </div>
               </div>
-            </CardContent>
-          </Card>
+
+              {/* Actions */}
+              <div className="flex gap-2 flex-shrink-0 w-full sm:w-auto justify-center sm:flex-1 items-center">
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/collection/${collection.collection}`}>
+                    <Stamp className="h-4 w-4 mr-2" />
+                    Mint NFT
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedCollectionAddress(collection.collection)
+                    setManageDialogOpen(true)
+                  }}
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         ))}
       </div>
+      {selectedCollectionAddress && (
+        <CollectionManageDialog
+          open={manageDialogOpen}
+          onOpenChange={setManageDialogOpen}
+          collectionAddress={selectedCollectionAddress}
+        />
+      )}
     </div>
-  )
+  );
 }
 
 function LoadingSkeleton() {
   return (
-    <div className="mt-8 space-y-4">
+    <div className="mt-8 space-y-4 min-w-full">
       <Skeleton className="h-8 w-48" />
       <div className="grid gap-4">
         {[1, 2, 3].map((i) => (
@@ -150,5 +175,5 @@ function LoadingSkeleton() {
         ))}
       </div>
     </div>
-  )
-} 
+  );
+}
