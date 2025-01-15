@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const url = await pinata.gateways.convert(uploadData.IpfsHash)
     return NextResponse.json(url, { status: 200 });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

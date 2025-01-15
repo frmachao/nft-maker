@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
-import { ExternalLink } from "lucide-react"
+import { Stamp } from "lucide-react"
 import { useEffect, useState } from 'react'
 import { decodeEventLog,parseAbiItem } from 'viem'
 
@@ -115,8 +115,8 @@ export default function CollectionsList() {
                 <div className="flex-shrink-0">
                   <Button asChild variant="outline" size="sm">
                     <Link href={`/collection/${collection.collection}`}>
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      View Details
+                      <Stamp className="h-4 w-4 mr-2" />
+                      Mint NFT
                     </Link>
                   </Button>
                 </div>
