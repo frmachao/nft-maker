@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -54,9 +54,17 @@ export default function UploadImage({ field }: UploadImageProps) {
       const uploadRequest = await fetch("/api/files", {
         method: "POST",
         body: data,
+        headers: {
+          "Upload-Password": password,
+        },
       });
 
       if (!uploadRequest.ok) {
+        if (uploadRequest.status === 401) {
+          setIsPasswordValid(false)
+          Cookies.remove("upload_password");
+          setShowPasswordDialog(true);
+        }
         throw new Error("Upload failed");
       }
 
@@ -84,6 +92,7 @@ export default function UploadImage({ field }: UploadImageProps) {
         setIsPasswordValid(true);
         setShowPasswordDialog(false);
       } else {
+        setIsPasswordValid(false);
         alert("Invalid password");
       }
     } catch (error) {
@@ -103,32 +112,6 @@ export default function UploadImage({ field }: UploadImageProps) {
       </>
     );
   };
-  useEffect(() => {
-    const verifyExistingPassword = async () => {
-      const savedPassword = Cookies.get("upload_password");
-      if (savedPassword) {
-        setIsVerifying(true);
-        try {
-          const response = await fetch("/api/verify-upload-password", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ password: savedPassword }),
-          });
-
-          if (response.ok) {
-            setIsPasswordValid(true);
-          } else {
-            Cookies.remove("upload_password");
-          }
-        } catch (error) {
-          console.error("Failed to verify password:", error);
-        }
-        setIsVerifying(false);
-      }
-    };
-
-    verifyExistingPassword();
-  }, []);
   return (
     <FormItem>
       <FormLabel>Collection Image</FormLabel>
