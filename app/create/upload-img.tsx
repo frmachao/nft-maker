@@ -32,12 +32,23 @@ export default function UploadImage({ field }: UploadImageProps) {
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [password, setPassword] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showImagePreview, setShowImagePreview] = useState(false)
 
+  const MAX_FILE_SIZE = 1 * 1024 * 1024 // 1MB in bytes
+
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const selectedFile = e.target.files?.[0]
+  if (selectedFile && selectedFile.size > MAX_FILE_SIZE) {
+    alert("File too large: Please select an image under 1MB")
+    e.target.value = ''
+    return
+  }
+  
+  setFile(selectedFile)
+}
   const uploadFile = async () => {
-    if (!isPasswordValid) {
+    if (!Cookies.get("upload_password")) {
       setShowPasswordDialog(true);
       return;
     }
@@ -55,13 +66,12 @@ export default function UploadImage({ field }: UploadImageProps) {
         method: "POST",
         body: data,
         headers: {
-          "Upload-Password": password,
+          "Upload-Password": Cookies.get("upload_password") || "",
         },
       });
 
       if (!uploadRequest.ok) {
         if (uploadRequest.status === 401) {
-          setIsPasswordValid(false)
           Cookies.remove("upload_password");
           setShowPasswordDialog(true);
         }
@@ -89,10 +99,9 @@ export default function UploadImage({ field }: UploadImageProps) {
 
       if (response.ok) {
         Cookies.set("upload_password", password, { expires: 7 });
-        setIsPasswordValid(true);
         setShowPasswordDialog(false);
       } else {
-        setIsPasswordValid(false);
+        Cookies.remove("upload_password");
         alert("Invalid password");
       }
     } catch (error) {
@@ -112,6 +121,7 @@ export default function UploadImage({ field }: UploadImageProps) {
       </>
     );
   };
+  
   return (
     <FormItem>
       <FormLabel>Collection Image</FormLabel>
@@ -121,7 +131,7 @@ export default function UploadImage({ field }: UploadImageProps) {
             <Input
               type="file"
               accept="image/*"
-              onChange={(e) => setFile(e.target.files?.[0])}
+              onChange={(e) => handleFileChange(e)}
               className="flex-1"
             />
             <Button

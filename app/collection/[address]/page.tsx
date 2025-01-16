@@ -20,7 +20,7 @@ import MintPeriod from "./mint-period";
 
 export default function CollectionDetail() {
   const { address } = useParams<{ address: string }>();
-  const { isConnected } = useAccount();
+  const { isConnected, address: userAddress } = useAccount();
   const { openConnectModal } = useConnectModal();
   const { data, isLoading } = useReadContracts({
     contracts: [
@@ -64,10 +64,22 @@ export default function CollectionDetail() {
         abi: NFTCollectionABI,
         functionName: "paused",
       },
+      {
+        address: address as `0x${string}`,
+        abi: NFTCollectionABI,
+        functionName: "whitelistOnly",
+      },
+      {
+        address: address as `0x${string}`,
+        abi: NFTCollectionABI,
+        functionName: "whitelist",
+        args: [userAddress as `0x${string}`],
+      },
     ],
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const {
     writeContract,
@@ -75,7 +87,11 @@ export default function CollectionDetail() {
     data: hash,
   } = useWriteContract();
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    isError: isMintError,
+  } = useWaitForTransactionReceipt({
     hash,
   });
 
@@ -108,7 +124,12 @@ export default function CollectionDetail() {
       // 3秒后隐藏成功提示
       setTimeout(() => setShowSuccess(false), 3000);
     }
-  }, [isSuccess]);
+    if (isMintError) {
+      setShowError(true);
+      // 3秒后隐藏错误提示
+      setTimeout(() => setShowError(false), 3000);
+    }
+  }, [isSuccess, isMintError]);
 
   const [
     name,
@@ -119,21 +140,33 @@ export default function CollectionDetail() {
     mintStartTime,
     mintEndTime,
     paused,
+    whitelistOnly,
+    userIsWhitelisted,
   ] = data?.map((result) => result.result) ?? [];
-
   const isDisabled = useMemo(() => {
     const now = Math.floor(Date.now() / 1000);
-
-    // 检查是否未开始（如果设置了开始时间）
     const notStarted = Number(mintStartTime) > 0 && Number(mintStartTime) > now;
-
-    // 检查是否已结束（如果设置了结束时间）
     const hasExpired = Number(mintEndTime) > 0 && Number(mintEndTime) < now;
 
+    const isNotWhitelisted = whitelistOnly && !userIsWhitelisted;
+
     return Boolean(
-      isWritePending || isConfirming || notStarted || hasExpired || paused
+      isWritePending ||
+        isConfirming ||
+        notStarted ||
+        hasExpired ||
+        paused ||
+        isNotWhitelisted
     );
-  }, [mintStartTime, mintEndTime, isWritePending, isConfirming, paused]);
+  }, [
+    mintStartTime,
+    mintEndTime,
+    isWritePending,
+    isConfirming,
+    paused,
+    userIsWhitelisted,
+    whitelistOnly,
+  ]);
 
   const getButtonText = () => {
     if (!isConnected) return "Connect Wallet";
@@ -171,6 +204,11 @@ export default function CollectionDetail() {
         {showSuccess && (
           <Alert className="bg-green-500/15 text-green-500">
             <AlertDescription>Successfully minted your NFT!</AlertDescription>
+          </Alert>
+        )}
+        {showError && (
+          <Alert className="bg-red-500/15 text-red-500">
+            <AlertDescription>Mint failed!</AlertDescription>
           </Alert>
         )}
 
@@ -218,6 +256,14 @@ export default function CollectionDetail() {
               </CardHeader>
               <CardContent>
                 <p>{paused ? "Yes" : "No"}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Whitelist Only</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>{whitelistOnly ? "Yes" : "No"}</p>
               </CardContent>
             </Card>
           </div>

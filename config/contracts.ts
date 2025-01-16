@@ -3,7 +3,7 @@ import { NFTCollectionABI } from './abis/NFTCollection';
 
 export const contracts = {
   sepolia: {
-    NFTFactory: '0x0Cc4FB1069F94678470653555aFCf73ff9c5530C'
+    NFTFactory: '0xfB42f542b995ED3Ebe1829a73abA642706d8d329'
   }
 } as const;
 

@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Dialog,
   DialogContent,
@@ -11,25 +12,25 @@ import { AlertCircle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { PauseToggleButton } from "./pause-toggle-button";
 import WhitelistManageButton from "./whitelist-manage-button"
-
+import { Collection } from "./collections-list";
 
 interface CollectionManageDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  collectionAddress: string;
+  collection: Collection;
 }
 
 export function CollectionManageDialog({
   open,
   onOpenChange,
-  collectionAddress,
+  collection,
 }: CollectionManageDialogProps) {
-
+const {collection:address,name,whitelistOnly} = collection
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>Collection Management</DialogTitle>
+          <DialogTitle>{name}</DialogTitle>
           <DialogDescription className="flex items-center gap-2 mt-2">
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
             Contract updates require gas fees for on-chain transactions
@@ -40,11 +41,12 @@ export function CollectionManageDialog({
           {/* Pause/Unpause Section */}
           <div className="space-y-2">
           <Label>Minting Status</Label>
-          <PauseToggleButton collectionAddress={collectionAddress} />
+          <PauseToggleButton collectionAddress={address} />
           </div>
 
           <Separator />
-
+          {whitelistOnly && (
+            <>
           {/* Whitelist Management Section */}
           <div className="space-y-4">
             <Label>Whitelist Management</Label>
@@ -53,7 +55,7 @@ export function CollectionManageDialog({
             <div className="space-y-2">
               <Label>Add Addresses to Whitelist</Label>
               <WhitelistManageButton 
-                collectionAddress={collectionAddress} 
+                collectionAddress={address} 
                 mode="add" 
               />
             </div>
@@ -62,11 +64,13 @@ export function CollectionManageDialog({
             <div className="space-y-2">
               <Label>Remove Addresses from Whitelist</Label>
               <WhitelistManageButton 
-                collectionAddress={collectionAddress} 
+                collectionAddress={address} 
                 mode="remove" 
               />
             </div>
           </div>
+          </>
+          )}
         </div>
       </DialogContent>
     </Dialog>

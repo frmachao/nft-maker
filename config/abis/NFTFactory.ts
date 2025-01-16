@@ -1,4 +1,21 @@
+import { parseAbiItem } from "viem";
+export const CollectionCreatedEvent = parseAbiItem(
+  'event CollectionCreated(' +
+      'address indexed creator, ' +
+      'address indexed collection, ' +
+      'string name, ' +
+      'string imageUrl, ' +
+      'uint256 maxSupply, ' +
+      'uint256 mintPrice, ' +
+      'uint256 mintStartTime, ' +
+      'uint256 mintEndTime, ' +
+      'bool whitelistOnly, ' +
+      'uint256 maxMintsPerWallet' +
+  ')'
+)
+
 export const NFTFactoryABI = [
+  CollectionCreatedEvent,
   {
     inputs: [],
     stateMutability: "nonpayable",
@@ -115,59 +132,4 @@ export const NFTFactoryABI = [
     stateMutability: "nonpayable",
     type: "function"
   },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "creator",
-        type: "address"
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "collection",
-        type: "address"
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "name",
-        type: "string"
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "imageUrl",
-        type: "string"
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "maxSupply",
-        type: "uint256"
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "mintPrice",
-        type: "uint256"
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "mintStartTime",
-        type: "uint256"
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "mintEndTime",
-        type: "uint256"
-      }
-    ],
-    name: "CollectionCreated",
-    type: "event"
-  }
 ] as const; 

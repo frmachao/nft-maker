@@ -1,21 +1,23 @@
 "use client";
 
 import { useAccount, usePublicClient } from "wagmi";
-import { contracts, NFTFactoryABI } from "@/config/contracts";
+import { contracts } from "@/config/contracts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { Stamp, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
-import { decodeEventLog, parseAbiItem } from "viem";
+import { AbiEvent } from "viem";
 import { CollectionManageDialog } from "./collection-manage-dialog"
-
-interface Collection {
+import { CollectionCreatedEvent } from "@/config/abis/NFTFactory"
+export interface Collection {
   creator: string;
   collection: string;
   name: string;
   imageUrl: string;
+  whitelistOnly: boolean;
+  maxMintsPerWallet: number;
 }
 
 export default function CollectionsList() {
@@ -23,46 +25,39 @@ export default function CollectionsList() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const publicClient = usePublicClient();
-  const [selectedCollectionAddress, setSelectedCollectionAddress] = useState<string>()
+  const [selectedCollection, setSelectedCollection] = useState<Collection>({
+    creator: "",
+    collection: "",
+    name: "",
+    imageUrl: "",
+    whitelistOnly: false,
+    maxMintsPerWallet: 0,
+  });
   const [manageDialogOpen, setManageDialogOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     async function getCollections() {
       if (!address || !publicClient) return;
-
       try {
         setIsLoading(true);
         const logs = await publicClient.getLogs({
           address: contracts.sepolia.NFTFactory,
-          event: parseAbiItem(
-            "event CollectionCreated(address indexed creator, address indexed collection, string name, string imageUrl, uint256 maxSupply, uint256 mintPrice, uint256 mintStartTime, uint256 mintEndTime)"
-          ),
+          event: CollectionCreatedEvent as AbiEvent,
           args: {
             creator: address,
           },
           fromBlock: 0n,
           toBlock: "latest",
         });
-
         const collections = logs.map((log) => {
-          const {
-            args: { creator, collection, name, imageUrl },
-          } = decodeEventLog({
-            abi: NFTFactoryABI,
-            data: log.data,
-            topics: log.topics,
-            eventName: "CollectionCreated",
-          });
-
-          return {
-            creator,
-            collection,
-            name,
-            imageUrl,
-          };
+          return log.args
         });
-
-        setCollections(collections);
+        setCollections(collections as unknown as Collection[]);
       } catch (error) {
         console.error("Failed to fetch collections:", error);
       } finally {
@@ -72,6 +67,10 @@ export default function CollectionsList() {
 
     getCollections();
   }, [address, publicClient]);
+
+  if (!mounted) {
+    return <div className="mt-8">Loading...</div>
+  }
 
   if (address && isLoading) {
     return <LoadingSkeleton />;
@@ -131,7 +130,7 @@ export default function CollectionsList() {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setSelectedCollectionAddress(collection.collection)
+                    setSelectedCollection(collection)
                     setManageDialogOpen(true)
                   }}
                 >
@@ -143,11 +142,11 @@ export default function CollectionsList() {
         </Card>
         ))}
       </div>
-      {selectedCollectionAddress && (
+      {selectedCollection && (
         <CollectionManageDialog
           open={manageDialogOpen}
           onOpenChange={setManageDialogOpen}
-          collectionAddress={selectedCollectionAddress}
+          collection={selectedCollection}
         />
       )}
     </div>

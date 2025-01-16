@@ -51,7 +51,7 @@ yarn dev
 
 ## Contract Addresses (Sepolia)
 
-- NFT Factory: `0x0Cc4FB1069F94678470653555aFCf73ff9c5530C`
+- NFT Factory: [0xfB42f542b995ED3Ebe1829a73abA642706d8d329](https://sepolia.etherscan.io/address/0xfB42f542b995ED3Ebe1829a73abA642706d8d329)
 
 ## Tech Stack
 

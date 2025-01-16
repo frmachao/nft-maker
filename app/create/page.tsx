@@ -168,7 +168,8 @@ export default function CreateCollection() {
           .find((event) => event?.eventName === "CollectionCreated");
 
         if (event) {
-          setCollectionAddress(event.args.collection);
+          const { collection } = event.args as { collection: `0x${string}` }
+          setCollectionAddress(collection);
           setShowSuccessDialog(true);
         }
       } catch (error) {
@@ -195,8 +196,7 @@ export default function CreateCollection() {
     const mintEndTime = values.mintEndTime
       ? Math.floor(new Date(values.mintEndTime).getTime() / 1000)
       : 0;
-    console.log(values);
-    console.log("mintStartTime,mintEndTime", { mintStartTime, mintEndTime });
+
     writeContract({
       abi: NFTFactoryABI,
       functionName: "createCollection",

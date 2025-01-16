@@ -11,7 +11,6 @@ export function Header() {
             <span className="text-xl font-bold">NFT Maker</span>
           </Link>
         </div>
-        
         <ConnectButton />
       </div>
     </header>

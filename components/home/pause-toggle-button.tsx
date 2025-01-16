@@ -20,14 +20,19 @@ export function PauseToggleButton({ collectionAddress }: PauseToggleButtonProps)
   } = useWaitForTransactionReceipt({
     hash,
   })
+  const [isPaused, setIsPaused] = useState(false)
+
   const { data: initialPaused, isLoading: isInitialPausedLoading } = useReadContract({
     address: collectionAddress as `0x${string}`,
     abi: NFTCollectionABI,
     functionName: 'paused',
   })
 
-  const [isPaused, setIsPaused] = useState(initialPaused)
-  console.log('initialPaused',initialPaused)
+  useEffect(() => {
+    if (initialPaused !== undefined) {
+        setIsPaused(initialPaused)
+      }
+  }, [initialPaused])
 
   useEffect(() => {
     if (isSuccess) {
