@@ -6,11 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { Stamp, Settings } from "lucide-react";
+import { Settings, Copy, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AbiEvent } from "viem";
 import { CollectionManageDialog } from "./collection-manage-dialog"
 import { CollectionCreatedEvent } from "@/config/abis/NFTFactory"
+import { useToast } from "@/hooks/use-toast"
+
 export interface Collection {
   creator: string;
   collection: string;
@@ -18,6 +20,11 @@ export interface Collection {
   imageUrl: string;
   whitelistOnly: boolean;
   maxMintsPerWallet: number;
+}
+
+// 添加地址格式化函数
+function formatAddress(address: string) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
 
 export default function CollectionsList() {
@@ -35,6 +42,8 @@ export default function CollectionsList() {
   });
   const [manageDialogOpen, setManageDialogOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const { toast } = useToast();
+  const [copiedAddress, setCopiedAddress] = useState<string>("");
 
   useEffect(() => {
     setMounted(true)
@@ -67,6 +76,23 @@ export default function CollectionsList() {
 
     getCollections();
   }, [address, publicClient]);
+
+  const handleCopy = async (address: string) => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopiedAddress(address);
+      toast({
+        description: "Address copied to clipboard",
+      });
+      setTimeout(() => setCopiedAddress(""), 2000);
+    } catch (error) {
+      console.error("Failed to copy address:", error);
+      toast({
+        variant: "destructive",
+        description: "Failed to copy address",
+      });
+    }
+  };
 
   if (!mounted) {
     return <div className="mt-8">Loading...</div>
@@ -112,9 +138,20 @@ export default function CollectionsList() {
                 {/* Info */}
                 <div className="flex-grow min-w-0">
                   <h3 className="font-semibold truncate">{collection.name}</h3>
-                  <p className="text-sm text-muted-foreground font-mono truncate">
-                    {collection.collection}
-                  </p>
+                  <button
+                    onClick={() => handleCopy(collection.collection)}
+                    className="flex items-center gap-2 group hover:text-primary transition-colors"
+                    title={collection.collection}
+                  >
+                    <p className="text-sm text-muted-foreground font-mono group-hover:text-primary">
+                      {formatAddress(collection.collection)}
+                    </p>
+                    {copiedAddress === collection.collection ? (
+                      <Check className="h-4 w-4 shrink-0" />
+                    ) : (
+                      <Copy className="h-4 w-4 shrink-0" />
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -122,8 +159,7 @@ export default function CollectionsList() {
               <div className="flex gap-2 flex-shrink-0 w-full sm:w-auto justify-center sm:flex-1 items-center">
                 <Button asChild variant="outline" size="sm">
                   <Link href={`/collection/${collection.collection}`}>
-                    <Stamp className="h-4 w-4 mr-2" />
-                    Mint NFT
+                    Details
                   </Link>
                 </Button>
                 <Button
