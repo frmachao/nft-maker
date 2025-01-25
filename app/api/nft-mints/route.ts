@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { isAddress } from "viem"
 import { Prisma } from "@prisma/client"
 import { cookies } from "next/headers"
+import { verifyToken } from '@/lib/jwt'
 
 export async function GET() {
   try {
@@ -44,8 +45,9 @@ export async function OPTIONS() {
 
 // 创建新的 NFT Mint
 export async function POST(request: Request) {
-  // 检查认证
-  if (!cookies().has("auth")) {
+  const authCookie = cookies().get("auth")
+  
+  if (!authCookie?.value || !verifyToken(authCookie.value)) {
     return NextResponse.json(
       { error: "Unauthorized" },
       { status: 401 }

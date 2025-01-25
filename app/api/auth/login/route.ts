@@ -1,5 +1,6 @@
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
+import { signToken } from '@/lib/jwt'
 
 export async function POST(request: Request) {
   const { username, password } = await request.json()
@@ -8,8 +9,9 @@ export async function POST(request: Request) {
     username === process.env.USER_NAME &&
     password === process.env.PASSWORD
   ) {
-    // Set auth cookie
-    cookies().set("auth", "true", {
+    const token = await signToken(username)
+    
+    cookies().set("auth", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

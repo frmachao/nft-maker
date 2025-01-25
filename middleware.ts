@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { verifyToken } from '@/lib/jwt'
 
-export function middleware(request: NextRequest) {
-  const isAuthenticated = request.cookies.get("auth")
+export async function middleware(request: NextRequest) {
+  const authCookie = request.cookies.get("auth")
+  const isAuthenticated = authCookie?.value && await verifyToken(authCookie.value)
   const isDashboard = request.nextUrl.pathname.startsWith("/dashboard")
   const isLoginPage = request.nextUrl.pathname === "/dashboard/login"
 
