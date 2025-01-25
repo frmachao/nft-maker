@@ -79,7 +79,7 @@ export function AddNFTDialog() {
           Add Collection
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Add New Collection</DialogTitle>
         </DialogHeader>

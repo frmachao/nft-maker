@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, MoreHorizontal, Copy, Trash } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Copy, Trash, Loader2 } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { NFTMint } from "@prisma/client"
 import { useToast } from "@/hooks/use-toast"
+import { useState } from "react"
 
 export const columns: ColumnDef<NFTMint>[] = [
   {
@@ -37,10 +38,11 @@ export const columns: ColumnDef<NFTMint>[] = [
     cell: function Cell({ row }) {
       const nft = row.original
       const { toast } = useToast()
+      const [isDeleting, setIsDeleting] = useState(false)
 
       const handleDelete = async () => {
         if (!confirm("Are you sure you want to delete this collection?")) return
-
+        setIsDeleting(true)
         const res = await fetch(`/api/nft-mints/${nft.id}`, {
           method: "DELETE",
         })
@@ -71,9 +73,15 @@ export const columns: ColumnDef<NFTMint>[] = [
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
+            {isDeleting ? (
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </Button>
+            ) : (
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={handleCopy}>
