@@ -1,21 +1,18 @@
 "use client";
 
-import { useAccount, usePublicClient } from "wagmi";
-import { contracts } from "@/config/contracts";
+import { useAccount, useChainId } from "wagmi";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { Settings, Copy, Check } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AbiEvent } from "viem";
 import { CollectionManageDialog } from "./collection-manage-dialog"
-import { CollectionCreatedEvent } from "@/config/abis/NFTFactory"
 import { useToast } from "@/hooks/use-toast"
 
 export interface Collection {
   creator: string;
-  collection: string;
+  address: string;
   name: string;
   imageUrl: string;
   whitelistOnly: boolean;
@@ -29,12 +26,12 @@ function formatAddress(address: string) {
 
 export default function CollectionsList() {
   const { address } = useAccount();
+  const chainId = useChainId();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const publicClient = usePublicClient();
   const [selectedCollection, setSelectedCollection] = useState<Collection>({
-    creator: "",
-    collection: "",
+    creator: "",  
+    address: "",
     name: "",
     imageUrl: "",
     whitelistOnly: false,
@@ -51,22 +48,15 @@ export default function CollectionsList() {
 
   useEffect(() => {
     async function getCollections() {
-      if (!address || !publicClient) return;
+      if (!address || !chainId) return;
       try {
         setIsLoading(true);
-        const logs = await publicClient.getLogs({
-          address: contracts.sepolia.NFTFactory,
-          event: CollectionCreatedEvent as AbiEvent,
-          args: {
-            creator: address,
-          },
-          fromBlock: 0n,
-          toBlock: "latest",
-        });
-        const collections = logs.map((log) => {
-          return log.args
-        });
-        setCollections(collections as unknown as Collection[]);
+        const res = await fetch(
+          `/api/collections?creator=${address}&chainId=${chainId}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        setCollections(data);
       } catch (error) {
         console.error("Failed to fetch collections:", error);
       } finally {
@@ -75,7 +65,7 @@ export default function CollectionsList() {
     }
 
     getCollections();
-  }, [address, publicClient]);
+  }, [address, chainId]);
 
   const handleCopy = async (address: string) => {
     try {
@@ -121,7 +111,7 @@ export default function CollectionsList() {
       <h2 className="text-2xl font-bold">Your Collections</h2>
       <div className="space-y-4">
         {collections.map((collection) => (
-          <Card key={collection.collection}>
+          <Card key={collection.address}>
           <CardContent className="p-4">
             <div className="flex flex-wrap gap-4">
               {/* Top Row: Thumbnail and Info */}
@@ -139,14 +129,14 @@ export default function CollectionsList() {
                 <div className="flex-grow min-w-0">
                   <h3 className="font-semibold truncate">{collection.name}</h3>
                   <button
-                    onClick={() => handleCopy(collection.collection)}
+                    onClick={() => handleCopy(collection.address)}
                     className="flex items-center gap-2 group hover:text-primary transition-colors"
-                    title={collection.collection}
+                    title={collection.address}
                   >
                     <p className="text-sm text-muted-foreground font-mono group-hover:text-primary">
-                      {formatAddress(collection.collection)}
+                      {formatAddress(collection.address)}
                     </p>
-                    {copiedAddress === collection.collection ? (
+                    {copiedAddress === collection.address ? (
                       <Check className="h-4 w-4 shrink-0" />
                     ) : (
                       <Copy className="h-4 w-4 shrink-0" />
@@ -158,7 +148,7 @@ export default function CollectionsList() {
               {/* Actions */}
               <div className="flex gap-2 flex-shrink-0 w-full sm:w-auto justify-center sm:flex-1 items-center">
                 <Button asChild variant="outline" size="sm">
-                  <Link href={`/collection/${collection.collection}`}>
+                  <Link href={`/collection/${collection.address}`}>
                     Details
                   </Link>
                 </Button>

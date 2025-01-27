@@ -5,29 +5,31 @@ import { Prisma } from "@prisma/client"
 import { cookies } from "next/headers"
 import { verifyToken } from '@/lib/jwt'
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const chainId = searchParams.get('chainId')
+
+  if (!chainId) {
+    return NextResponse.json(
+      { error: "Missing chainId parameter" },
+      { status: 400 }
+    )
+  }
+
   try {
     const nftMints = await prisma.nFTMint.findMany({
+      where: {
+        chainId: parseInt(chainId)
+      },
       orderBy: { createdAt: "desc" },
     })
     
-    return new NextResponse(JSON.stringify(nftMints), {
-      headers: {
-        'Access-Control-Allow-Origin': 'https://mint-nft-single.vercel.app',
-        'Content-Type': 'application/json',
-      },
-    })
+    return NextResponse.json(nftMints)
   } catch (error) {
     console.error(error)
-    return new NextResponse(
-      JSON.stringify({ error: "Failed to fetch NFT mints" }), 
-      { 
-        status: 500,
-        headers: {
-          'Access-Control-Allow-Origin': 'https://mint-nft-single.vercel.app',
-          'Content-Type': 'application/json',
-        },
-      }
+    return NextResponse.json(
+      { error: "Failed to fetch NFT mints" },
+      { status: 500 }
     )
   }
 }
@@ -36,8 +38,8 @@ export async function GET() {
 export async function OPTIONS() {
   return new NextResponse(null, {
     headers: {
-      'Access-Control-Allow-Origin': 'https://mint-nft-single.vercel.app',
-      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
   })
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { address } = await request.json()
+    const { address, chainId } = await request.json()
     
     if (!isAddress(address)) {
       return NextResponse.json(
@@ -64,15 +66,25 @@ export async function POST(request: Request) {
       )
     }
 
+    if (!chainId) {
+      return NextResponse.json(
+        { error: "Missing chainId" },
+        { status: 400 }
+      )
+    }
+
     const nftMint = await prisma.nFTMint.create({
-      data: { address },
+      data: { 
+        address,
+        chainId: parseInt(chainId)
+      },
     })
     return NextResponse.json(nftMint)
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === 'P2002') {
         return NextResponse.json(
-          { error: "Contract address already exists" },
+          { error: "Collection already exists on this chain" },
           { status: 400 }
         )
       }

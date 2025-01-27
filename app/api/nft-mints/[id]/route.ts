@@ -17,7 +17,7 @@ export async function DELETE(
 
   try {
     await prisma.nFTMint.delete({
-      where: { id: params.id },
+      where: { id: params.id }
     })
     return NextResponse.json({ success: true })
   } catch (error) {
