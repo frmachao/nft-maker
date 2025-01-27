@@ -25,7 +25,7 @@ export function CollectionManageDialog({
   onOpenChange,
   collection,
 }: CollectionManageDialogProps) {
-const {collection:address,name,whitelistOnly} = collection
+const {address,name,whitelistOnly} = collection
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>

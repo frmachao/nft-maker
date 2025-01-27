@@ -31,9 +31,14 @@ const formSchema = z.object({
   }),
 })
 
-export function AddNFTDialog() {
+interface AddNFTDialogProps {
+  chainId: number
+  onSuccess: () => void
+}
+
+export function AddNFTDialog({ chainId, onSuccess }: AddNFTDialogProps) {
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -46,7 +51,10 @@ export function AddNFTDialog() {
       const res = await fetch("/api/nft-mints", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          address: values.address,
+          chainId: chainId
+        }),
       })
 
       if (!res.ok) {
@@ -59,7 +67,7 @@ export function AddNFTDialog() {
       })
       setOpen(false)
       form.reset()
-      window.location.reload()
+      onSuccess()
     } catch (error: Error | unknown) {
       toast({
         variant: "destructive",

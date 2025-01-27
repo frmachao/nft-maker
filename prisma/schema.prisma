@@ -11,7 +11,25 @@ datasource db {
 
 model NFTMint {
   id        String   @id @default(cuid())
-  address   String   @unique // 合约地址
+  address   String   // 合约地址
+  chainId   Int      // 链 ID
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([address])
+}
+
+model NFTCollection {
+  id        String   @id @default(cuid())
+  address   String   // 合约地址
+  creator   String   // 创建者钱包地址
+  name      String
+  imageUrl  String
+  chainId   Int      // 链 ID
+  whitelistOnly Boolean
+  maxMintsPerWallet Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([address, chainId])
 }

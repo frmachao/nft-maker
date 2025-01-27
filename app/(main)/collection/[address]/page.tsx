@@ -7,6 +7,7 @@ import {
   useWaitForTransactionReceipt,
   useReadContract,
   useAccount,
+  useChainId,
 } from "wagmi";
 import { NFTCollectionABI } from "@/config/abis/NFTCollection";
 import { Progress } from "@/components/ui/progress";
@@ -17,6 +18,7 @@ import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import LoadingSkeleton from "./loading-skeleton";
 import MintPeriod from "./mint-period";
+import { getNativeTokenSymbol } from '@/lib/chain'
 
 export default function CollectionDetail() {
   const { address } = useParams<{ address: string }>();
@@ -102,6 +104,9 @@ export default function CollectionDetail() {
       abi: NFTCollectionABI,
       functionName: "totalSupply",
     });
+
+  const chainId = useChainId()
+  const nativeToken = chainId ? getNativeTokenSymbol(chainId) : 'ETH'
 
   const handleMint = async () => {
     if (!isConnected) {
@@ -237,7 +242,7 @@ export default function CollectionDetail() {
                 <CardTitle>Mint Price</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>{formatUnits(mintPrice as bigint, 18)} ETH</p>
+                <p>{formatUnits(mintPrice as bigint, 18)} {nativeToken}</p>
               </CardContent>
             </Card>
 

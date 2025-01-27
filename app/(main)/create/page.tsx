@@ -20,9 +20,8 @@ import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useChainId,
 } from "wagmi";
-import { contracts, NFTFactoryABI } from "@/config/contracts";
-import { parseEther, isAddress } from "viem";
 import {
   Dialog,
   DialogContent,
@@ -31,11 +30,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import UploadImage from "./upload-img";
-import { decodeEventLog } from "viem";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { FormValues } from "./types";
+import { getNativeTokenSymbol } from '@/lib/chain'
+import { decodeEventLog, isAddress, parseEther } from "viem";
+import { NFTFactoryABI } from "@/config/contracts";
 
+import { getNFTFactoryAddress } from "@/config/contracts";
 const formSchema = z
   .object({
     name: z.string().min(1, "Name is required"),
@@ -123,6 +125,8 @@ const formSchema = z
 
 export default function CreateCollection() {
   const { isConnected } = useAccount();
+  const chainId = useChainId();
+  const nativeToken = chainId ? getNativeTokenSymbol(chainId) : 'ETH';
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -149,7 +153,54 @@ export default function CreateCollection() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [collectionAddress, setCollectionAddress] = useState<string>();
   const [showError, setShowError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    const handleConfirmation = async () => {
+      if (isConfirmed && hash && receipt) {
+        setIsLoading(true);
+        try {
+          const event = receipt.logs
+          .map((log) => {
+            try {
+              return decodeEventLog({
+                abi: NFTFactoryABI,
+                data: log.data,
+                topics: log.topics,
+              });
+            } catch {
+              return undefined;
+            }
+          })
+          .find((event) => event?.eventName === "CollectionCreated");
+          if (event) {
+            const  collection  = event.args as { collection: `0x${string}`, creator: `0x${string}`, name: string, imageUrl: string, whitelistOnly: boolean, maxMintsPerWallet: bigint }
+            await fetch("/api/collections", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                address: collection.collection,
+                creator: collection.creator,
+                name: collection.name,
+                imageUrl: collection.imageUrl,
+                chainId: chainId,
+                whitelistOnly: collection.whitelistOnly,
+                maxMintsPerWallet: Number(collection.maxMintsPerWallet),
+              }),
+            });
+            setCollectionAddress(collection.collection);
+            setShowSuccessDialog(true);
+          }
+        } catch (error) {
+          console.error("Failed to parse event:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
 
+    handleConfirmation();
+  }, [isConfirmed, hash, receipt, chainId]);
+  
   useEffect(() => {
     if (isConfirmed && hash && receipt) {
       try {
@@ -177,7 +228,6 @@ export default function CreateCollection() {
       }
     }
   }, [isConfirmed, hash, receipt]);
-
   useEffect(() => {
     if (confirmError) {
       setShowError(true);
@@ -200,7 +250,7 @@ export default function CreateCollection() {
     writeContract({
       abi: NFTFactoryABI,
       functionName: "createCollection",
-      address: contracts.sepolia.NFTFactory,
+      address: getNFTFactoryAddress(chainId),
       args: [
         values.name,
         values.description,
@@ -224,6 +274,7 @@ export default function CreateCollection() {
   const getButtonText = () => {
     if (isWritePending) return "Confirming Transaction...";
     if (isConfirming) return "Creating Collection...";
+    if (isLoading) return "Syncing Database...";
     return "Create Collection";
   };
 
@@ -290,7 +341,7 @@ export default function CreateCollection() {
                 name="mintPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mint Price (ETH)</FormLabel>
+                    <FormLabel>Mint Price ({nativeToken})</FormLabel>
                     <FormControl>
                       <Input type="number" min="0" step="0.01" {...field} />
                     </FormControl>
@@ -421,7 +472,7 @@ export default function CreateCollection() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isWritePending || isConfirming || !isConnected}
+                disabled={isWritePending || isConfirming || !isConnected || isLoading}
               >
                 {getButtonText()}
               </Button>
