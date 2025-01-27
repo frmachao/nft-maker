@@ -343,7 +343,7 @@ export default function CreateCollection() {
                   <FormItem>
                     <FormLabel>Mint Price ({nativeToken})</FormLabel>
                     <FormControl>
-                      <Input type="number" min="0" step="0.01" {...field} />
+                      <Input type="number" min="0" step="0.000001" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

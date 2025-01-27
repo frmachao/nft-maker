@@ -4,14 +4,13 @@ import { DataTable } from "./data-table"
 import { columns } from "./columns"
 import { AddNFTDialog } from "./add-nft-dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { sepolia, bsc, bscTestnet } from 'viem/chains'
+import { sepolia, bsc } from 'viem/chains'
 import { useState, useEffect, useCallback } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const chains = [
-  { id: sepolia.id, name: "Sepolia" },
   { id: bsc.id, name: "BSC" },
-  { id: bscTestnet.id, name: "BSC Testnet" },
+  { id: sepolia.id, name: "Sepolia" },
 ]
 
 export default function Dashboard() {
@@ -69,23 +68,28 @@ export default function Dashboard() {
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold">NFT Collections</h1>
-          <Select
-            value={selectedChainId.toString()}
-            onValueChange={(value) => setSelectedChainId(parseInt(value))}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select network" />
-            </SelectTrigger>
-            <SelectContent>
-              {chains.map((chain) => (
-                <SelectItem key={chain.id} value={chain.id.toString()}>
-                  {chain.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold">NFT Collections</h1>
+            <Select
+              value={selectedChainId.toString()}
+              onValueChange={(value) => setSelectedChainId(parseInt(value))}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select network" />
+              </SelectTrigger>
+              <SelectContent>
+                {chains.map((chain) => (
+                  <SelectItem key={chain.id} value={chain.id.toString()}>
+                    {chain.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Manage your NFT collections that will be published to the NFT minting application.
+          </p>
         </div>
         <AddNFTDialog chainId={selectedChainId} onSuccess={fetchNFTMints} />
       </div>

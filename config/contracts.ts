@@ -1,6 +1,6 @@
 import { NFTFactoryABI } from './abis/NFTFactory';
 import { NFTCollectionABI } from './abis/NFTCollection';
-import { sepolia, bsc, bscTestnet } from 'viem/chains'
+import { sepolia, bsc } from 'viem/chains'
 
 export const contracts = {
   sepolia: {
@@ -9,17 +9,12 @@ export const contracts = {
   bsc: {
     NFTFactory: "0xd96052C0959540EF2d2C0c26ccD4E1c31a5b31F7" as const, // BSC 主网合约地址
   },
-  bscTestnet: {
-    NFTFactory: "0xd96052C0959540EF2d2C0c26ccD4E1c31a5b31F7" as const, // BSC 测试网合约地址
-  }
 } as const;
 
 export function getNFTFactoryAddress(chainId: number) {
   switch (chainId) {
     case bsc.id: // BSC
       return contracts.bsc.NFTFactory
-    case bscTestnet.id: // BSC Testnet
-      return contracts.bscTestnet.NFTFactory
     case sepolia.id: // Sepolia
       return contracts.sepolia.NFTFactory
     default:

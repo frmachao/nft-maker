@@ -34,17 +34,6 @@ export async function GET(request: Request) {
   }
 }
 
-// 处理预检请求
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  })
-}
-
 // 创建新的 NFT Mint
 export async function POST(request: Request) {
   const authCookie = cookies().get("auth")
