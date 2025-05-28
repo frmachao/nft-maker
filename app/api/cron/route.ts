@@ -10,11 +10,24 @@ export async function GET(req: Request) {
     try {
         // 简单查询总数，保持数据库连接活跃
         const count = await prisma.nFTMint.count();
+        // 查询 NFTCollection 总数
+        const collectionCount = await prisma.nFTCollection.count();
+        // 查询最近一个 NFTMint
+        const latestMint = await prisma.nFTMint.findFirst({
+          orderBy: { createdAt: 'desc' }
+        });
+        // 查询最近一个 NFTCollection
+        const latestCollection = await prisma.nFTCollection.findFirst({
+          orderBy: { createdAt: 'desc' }
+        });
         
         return NextResponse.json({ 
             success: true, 
             message: 'Database pinged successfully',
-            count 
+            count,
+            collectionCount,
+            latestMint,
+            latestCollection
         });
     } catch (error) {
         console.error('Cron job failed:', error);
