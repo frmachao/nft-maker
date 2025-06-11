@@ -4,7 +4,7 @@ import { sepolia, bsc } from 'viem/chains'
 
 export const contracts = {
   sepolia: {
-    NFTFactory: "0x929126561e6BB9DD21134C0a9c6E56C2A29c3148" as const,
+    NFTFactory: "0x20Afc1897De534bB6a6501257aae354cC99Bfd55" as const,
   },
   bsc: {
     NFTFactory: "0xd96052C0959540EF2d2C0c26ccD4E1c31a5b31F7" as const, // BSC 主网合约地址

@@ -325,4 +325,18 @@ export const NFTCollectionABI = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  // OpenZeppelin Ownable 方法
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
 ] as const;

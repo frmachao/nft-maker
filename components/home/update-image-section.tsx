@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useToast } from "@/hooks/use-toast";
 import { NFTCollectionABI } from "@/config/abis/NFTCollection";
-import { UploadCloud, ZoomIn, Eye, EyeOff } from "lucide-react";
+import { UploadCloud, ZoomIn, } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -35,20 +35,12 @@ export function UpdateImageSection({
     // 状态
     file,
     uploading,
-    showPasswordDialog,
-    password,
-    isVerifying,
-    showPassword,
     
     // 设置状态的函数
-    setShowPasswordDialog,
-    setPassword,
-    setShowPassword,
     
     // 核心功能函数
     handleFileChange,
     uploadFile,
-    handlePasswordSubmit,
   } = useImageUpload({
     onUploadSuccess: (imageUrl) => {
       setNewImageUrl(imageUrl);
@@ -141,7 +133,7 @@ export function UpdateImageSection({
           <Button
             type="button"
             onClick={uploadFile}
-            disabled={!file || uploading || isVerifying}
+            disabled={!file || uploading}
             variant="outline"
           >
             {uploading ? "上传中..." : (
@@ -234,48 +226,6 @@ export function UpdateImageSection({
         </DialogContent>
       </Dialog>
 
-      {/* 密码验证对话框 */}
-      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>需要上传密码</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">密码</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="请输入上传密码"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-            <Button 
-              className="w-full" 
-              onClick={handlePasswordSubmit} 
-              disabled={isVerifying || !password}
-            >
-              {isVerifying ? "验证中..." : "确认"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 } 

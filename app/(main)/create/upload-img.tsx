@@ -14,11 +14,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
-import { UploadCloud, Eye, EyeOff, ZoomIn } from "lucide-react";
+import { UploadCloud, ZoomIn } from "lucide-react";
 import { ControllerRenderProps } from "react-hook-form";
-import { Label } from "@/components/ui/label";
 import { FormValues } from "./types";
 import { useImageUpload } from "@/hooks/use-image-upload";
 
@@ -33,20 +31,10 @@ export default function UploadImage({ field }: UploadImageProps) {
     // 状态
     file,
     uploading,
-    showPasswordDialog,
-    password,
-    isVerifying,
-    showPassword,
-    
-    // 设置状态的函数
-    setShowPasswordDialog,
-    setPassword,
-    setShowPassword,
     
     // 核心功能函数
     handleFileChange,
     uploadFile,
-    handlePasswordSubmit,
   } = useImageUpload({
     onUploadSuccess: (imageUrl) => {
       field.onChange(imageUrl);
@@ -54,7 +42,6 @@ export default function UploadImage({ field }: UploadImageProps) {
   });
 
   const getButtonText = () => {
-    if (isVerifying) return "Verifying Password...";
     if (uploading) return "Uploading...";
     return (
       <>
@@ -79,7 +66,7 @@ export default function UploadImage({ field }: UploadImageProps) {
             <Button
               type="button"
               onClick={uploadFile}
-              disabled={!file || uploading || isVerifying}
+              disabled={!file || uploading}
             >
               {getButtonText()}
             </Button>
@@ -127,48 +114,6 @@ export default function UploadImage({ field }: UploadImageProps) {
       </FormControl>
       <FormDescription>Upload an image for your NFT collection</FormDescription>
       <FormMessage />
-      
-      {/* 密码验证对话框 */}
-      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upload Password Required</DialogTitle>
-            <DialogDescription>
-              To prevent abuse of our IPFS service, image uploads require a
-              password.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-            <Button className="w-full" onClick={handlePasswordSubmit} disabled={isVerifying}>
-              {isVerifying ? "Verifying..." : "Submit"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </FormItem>
   );
 }
