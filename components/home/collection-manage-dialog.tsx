@@ -11,7 +11,8 @@ import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { PauseToggleButton } from "./pause-toggle-button";
-import WhitelistManageButton from "./whitelist-manage-button"
+import WhitelistManageButton from "./whitelist-manage-button";
+import { UpdateImageSection } from "./update-image-section";
 import { Collection } from "./collections-list";
 
 interface CollectionManageDialogProps {
@@ -44,6 +45,17 @@ const {address,name,whitelistOnly} = collection
           <PauseToggleButton collectionAddress={address} />
           </div>
 
+          <Separator />
+          
+          {/* 更新图片功能 */}
+          <div className="space-y-4">
+            <Label>Update Image</Label>
+            <UpdateImageSection 
+              collectionAddress={address}
+              currentImageUrl={collection.imageUrl}
+            />
+          </div>
+          
           <Separator />
           {whitelistOnly && (
             <>

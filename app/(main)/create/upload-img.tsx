@@ -16,101 +16,43 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { UploadCloud,Eye, EyeOff,ZoomIn } from "lucide-react";
+import { UploadCloud, Eye, EyeOff, ZoomIn } from "lucide-react";
 import { ControllerRenderProps } from "react-hook-form";
-import Cookies from "js-cookie";
 import { Label } from "@/components/ui/label";
 import { FormValues } from "./types";
+import { useImageUpload } from "@/hooks/use-image-upload";
 
 interface UploadImageProps {
   field: ControllerRenderProps<FormValues, "imageUrl">;
 }
 
 export default function UploadImage({ field }: UploadImageProps) {
-  const [file, setFile] = useState<File>();
-  const [uploading, setUploading] = useState(false);
-  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
-  const [password, setPassword] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showImagePreview, setShowImagePreview] = useState(false)
+  const [showImagePreview, setShowImagePreview] = useState(false);
 
-  const MAX_FILE_SIZE = 1 * 1024 * 1024 // 1MB in bytes
+  const {
+    // 状态
+    file,
+    uploading,
+    showPasswordDialog,
+    password,
+    isVerifying,
+    showPassword,
+    
+    // 设置状态的函数
+    setShowPasswordDialog,
+    setPassword,
+    setShowPassword,
+    
+    // 核心功能函数
+    handleFileChange,
+    uploadFile,
+    handlePasswordSubmit,
+  } = useImageUpload({
+    onUploadSuccess: (imageUrl) => {
+      field.onChange(imageUrl);
+    },
+  });
 
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const selectedFile = e.target.files?.[0]
-  if (selectedFile && selectedFile.size > MAX_FILE_SIZE) {
-    alert("File too large: Please select an image under 1MB")
-    e.target.value = ''
-    return
-  }
-  
-  setFile(selectedFile)
-}
-  const uploadFile = async () => {
-    if (!Cookies.get("upload_password")) {
-      setShowPasswordDialog(true);
-      return;
-    }
-    try {
-      if (!file) {
-        window.alert("No file selected");
-        return;
-      }
-
-      setUploading(true);
-      const data = new FormData();
-      data.set("file", file);
-
-      const uploadRequest = await fetch("/api/files", {
-        method: "POST",
-        body: data,
-        headers: {
-          "Upload-Password": Cookies.get("upload_password") || "",
-        },
-      });
-
-      if (!uploadRequest.ok) {
-        if (uploadRequest.status === 401) {
-          Cookies.remove("upload_password");
-          setShowPasswordDialog(true);
-        }
-        throw new Error("Upload failed");
-      }
-
-      const ipfsUrl = await uploadRequest.json();
-      field.onChange(ipfsUrl);
-      setFile(undefined);
-    } catch (e) {
-      console.error(e);
-      window.alert("Failed to upload file");
-    } finally {
-      setUploading(false);
-    }
-  };
-  const handlePasswordSubmit = async () => {
-    try {
-      setIsVerifying(true);
-      const response = await fetch("/api/verify-upload-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-
-      if (response.ok) {
-        Cookies.set("upload_password", password, { expires: 7 });
-        setShowPasswordDialog(false);
-      } else {
-        Cookies.remove("upload_password");
-        alert("Invalid password");
-      }
-    } catch (error) {
-      console.error("Failed to verify password:", error);
-      alert("Failed to verify password");
-    } finally {
-      setIsVerifying(false);
-    }
-  };
   const getButtonText = () => {
     if (isVerifying) return "Verifying Password...";
     if (uploading) return "Uploading...";
@@ -131,7 +73,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             <Input
               type="file"
               accept="image/*"
-              onChange={(e) => handleFileChange(e)}
+              onChange={handleFileChange}
               className="flex-1"
             />
             <Button
@@ -185,6 +127,8 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       </FormControl>
       <FormDescription>Upload an image for your NFT collection</FormDescription>
       <FormMessage />
+      
+      {/* 密码验证对话框 */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
         <DialogContent>
           <DialogHeader>
@@ -195,7 +139,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-          <div className="space-y-2">
+            <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input

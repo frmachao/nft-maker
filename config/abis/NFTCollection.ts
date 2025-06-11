@@ -311,4 +311,18 @@ export const NFTCollectionABI = [
     stateMutability: "view",
     type: "function",
   },
+  // 更新图片
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_newImageUrl",
+        type: "string",
+      },
+    ],
+    name: "setImage",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ] as const;
