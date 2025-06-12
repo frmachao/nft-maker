@@ -1,3 +1,4 @@
+"use client"
 import { CardContent } from "@/components/ui/card"
 
 export default function MintPeriod({ startTime, endTime }: { startTime: bigint, endTime: bigint }) {

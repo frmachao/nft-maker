@@ -27,7 +27,7 @@ export default function LoginPage() {
       })
 
       if (res.ok) {
-        router.push("/dashboard")
+        router.push("/")
         router.refresh()
       } else {
         toast({
@@ -52,7 +52,7 @@ export default function LoginPage() {
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle>Dashboard Login</CardTitle>
+          <CardTitle>管理员登录</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
