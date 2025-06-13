@@ -2,16 +2,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import { pinata } from "@/lib/server/utils";
 
 export async function POST(request: NextRequest) {
-  // 验证密码
-  const password = request.headers.get("Upload-Password");
-  const validPasswords = process.env.UPLOAD_PASSWORD?.split(",") || [];
-
-  if (!password || !validPasswords.includes(password)) {
-    return NextResponse.json(
-      { error: "Invalid upload password" },
-      { status: 401 }
-    );
-  }
 
   if (!request.body) {
     return NextResponse.json({ error: "No file uploaded" }, { status: 400 });

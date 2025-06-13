@@ -2,7 +2,7 @@
 
 import { useState,useEffect,useMemo } from "react"
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi"
-import { NFTCollectionABI } from "@/config/contracts"
+import { NFTCollectionABI } from "@/config/abis/NFTCollection"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { UserPlus, UserMinus } from "lucide-react"
@@ -12,11 +12,17 @@ import { isAddress } from "viem";
 interface WhitelistManageButtonProps {
   collectionAddress: string
   mode: 'add' | 'remove'
+  onSuccess?: () => void
+  onError?: () => void
+  onStart?: () => void
 }
 
 export default function WhitelistManageButton({ 
   collectionAddress, 
-  mode 
+  mode,
+  onSuccess,
+  onError,
+  onStart
 }: WhitelistManageButtonProps) {
   const [addresses, setAddresses] = useState("")
   const { toast } = useToast()
@@ -34,17 +40,21 @@ export default function WhitelistManageButton({
   useEffect(() => {
     if (isError) {
       toast({
-        title: "Error",
-        description: `Failed to ${mode === 'add' ? 'add' : 'remove'} to whitelist`,
+        title: "错误",
+        description: `${mode === 'add' ? '添加到' : '从'}白名单操作失败`,
+        variant: "destructive",
       })
+      onError?.()
     }
     if (isSuccess) {
       toast({
-        title: "Success",
-        description: `Whitelist ${mode === 'add' ? 'added' : 'removed'} successfully`,
+        title: "成功",
+        description: `白名单${mode === 'add' ? '添加' : '移除'}成功`,
       })
+      setAddresses("")
+      onSuccess?.()
     }
-  }, [isError,toast,isSuccess,mode])
+  }, [isError,toast,isSuccess,mode,onError,onSuccess])
 
 
   const validation = useMemo(() => {
@@ -75,6 +85,7 @@ export default function WhitelistManageButton({
       .map(addr => addr.trim())
       .filter(addr => addr.length > 0)
 
+    onStart?.()
     writeContract({
       address: collectionAddress as `0x${string}`,
       abi: NFTCollectionABI,

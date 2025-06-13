@@ -16,7 +16,7 @@ export function UserButton() {
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" })
-    router.push("/dashboard/login")
+    router.push("/login")
     router.refresh()
   }
 
@@ -32,7 +32,7 @@ export function UserButton() {
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
-          Logout
+          退出登录
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

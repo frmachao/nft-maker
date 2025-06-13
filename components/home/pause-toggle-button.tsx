@@ -2,15 +2,18 @@
 
 import { useState, useEffect } from "react"
 import { useWriteContract, useWaitForTransactionReceipt,useReadContract } from "wagmi"
-import { NFTCollectionABI } from "@/config/contracts"
+import { NFTCollectionABI } from "@/config/abis/NFTCollection"
 import { Button } from "@/components/ui/button"
 import { Play, Pause } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 interface PauseToggleButtonProps {
   collectionAddress: string
+  onSuccess?: () => void
+  onError?: () => void
+  onStart?: () => void
 }
 
-export function PauseToggleButton({ collectionAddress }: PauseToggleButtonProps) {
+export function PauseToggleButton({ collectionAddress, onSuccess, onError, onStart }: PauseToggleButtonProps) {
   const { toast } = useToast()
   const { writeContract, isPending: isWritePending, data: hash } = useWriteContract()
   const { 
@@ -37,21 +40,25 @@ export function PauseToggleButton({ collectionAddress }: PauseToggleButtonProps)
   useEffect(() => {
     if (isSuccess) {
         toast({
-            title: "Hit",
-            description: `Collection ${isPaused ? "resumed" : "paused"}!`,
+            title: "成功",
+            description: `集合已${isPaused ? "恢复" : "暂停"}铸造!`,
           })
-    setIsPaused(prev => !prev)
+        setIsPaused(prev => !prev)
+        onSuccess?.()
     }
     if (isError) {
       toast({
-        title: "Error",
-        description: `Failed to ${isPaused ? "resume" : "pause"} collection`,
+        title: "错误",
+        description: `${isPaused ? "恢复" : "暂停"}集合失败`,
+        variant: "destructive",
       })
+      onError?.()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess,isError])
 
   const handlePauseToggle = () => {
+    onStart?.()
     writeContract({
       address: collectionAddress as `0x${string}`,
       abi: NFTCollectionABI,

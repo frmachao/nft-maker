@@ -13,7 +13,7 @@ const chains = [
   { id: sepolia.id, name: "Sepolia" },
 ]
 
-export default function Dashboard() {
+export default function MintManagement() {
   const [selectedChainId, setSelectedChainId] = useState<number>(sepolia.id)
   const [nftMints, setNftMints] = useState([])
   const [loading, setLoading] = useState(true)
@@ -70,7 +70,7 @@ export default function Dashboard() {
       <div className="flex justify-between items-center mb-8">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">NFT Collections</h1>
+            <h1 className="text-2xl font-bold">铸造管理</h1>
             <Select
               value={selectedChainId.toString()}
               onValueChange={(value) => setSelectedChainId(parseInt(value))}
@@ -88,7 +88,7 @@ export default function Dashboard() {
             </Select>
           </div>
           <p className="text-sm text-muted-foreground">
-            Manage your NFT collections that will be published to the NFT minting application.
+            管理将发布到NFT铸造应用程序的NFT集合。
           </p>
         </div>
         <AddNFTDialog chainId={selectedChainId} onSuccess={fetchNFTMints} />

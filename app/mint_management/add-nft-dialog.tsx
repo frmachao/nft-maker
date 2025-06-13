@@ -63,9 +63,9 @@ export function AddNFTDialog({ chainId, onSuccess }: AddNFTDialogProps) {
         throw new Error(error.error)
       }
       toast({
-        title: "Success",
-        description: "Collection added successfully",
-      })
+        title: "成功",
+        description: "集合已成功发布到铸造系统",
+      });
       setOpen(false)
       form.reset()
       onSuccess()

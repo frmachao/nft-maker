@@ -311,4 +311,32 @@ export const NFTCollectionABI = [
     stateMutability: "view",
     type: "function",
   },
+  // 更新图片
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_newImageUrl",
+        type: "string",
+      },
+    ],
+    name: "setImage",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  // OpenZeppelin Ownable 方法
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
 ] as const;
