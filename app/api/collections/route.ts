@@ -5,6 +5,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const creator = searchParams.get('creator')
   const chainId = searchParams.get('chainId')
+  const page = parseInt(searchParams.get('page') || '1')
+  const limit = parseInt(searchParams.get('limit') || '10')
 
   if (!creator || !chainId) {
     return new NextResponse(
@@ -14,15 +16,37 @@ export async function GET(request: Request) {
   }
 
   try {
-    const collections = await prisma.nFTCollection.findMany({
-      where: {
-        creator,
-        chainId: parseInt(chainId),
-      },
-      orderBy: { createdAt: "desc" },
-    })
+    const skip = (page - 1) * limit
+
+    const [collections, total] = await Promise.all([
+      prisma.nFTCollection.findMany({
+        where: {
+          creator,
+          chainId: parseInt(chainId),
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.nFTCollection.count({
+        where: {
+          creator,
+          chainId: parseInt(chainId),
+        },
+      })
+    ])
     
-    return NextResponse.json(collections)
+    return NextResponse.json({
+      collections,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page < Math.ceil(total / limit),
+        hasPrev: page > 1,
+      }
+    })
   } catch (error) {
     console.error(error)
     return new NextResponse(

@@ -14,12 +14,20 @@ import { PauseToggleButton } from "./pause-toggle-button";
 import WhitelistManageButton from "./whitelist-manage-button";
 import { UpdateImageSection } from "./update-image-section";
 import { DebugContractInfo } from "./debug-contract-info";
-import { Collection } from "./collections-list";
+
+
+type Collection = {
+  address: string;
+  name: string;
+  whitelistOnly: boolean;
+  imageUrl: string;
+}
 
 interface CollectionManageDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   collection: Collection;
+  refetch: () => void;
 }
 
 export function CollectionManageDialog({
@@ -53,7 +61,7 @@ const {address,name,whitelistOnly} = collection
           
           {/* 更新图片功能 */}
           <div className="space-y-4">
-            <Label>Update Image</Label>
+            <Label>更新nft图片</Label>
             <UpdateImageSection 
               collectionAddress={address}
               currentImageUrl={collection.imageUrl}

@@ -19,11 +19,17 @@ import { useImageUpload } from "@/hooks/use-image-upload";
 interface UpdateImageSectionProps {
   collectionAddress: string;
   currentImageUrl?: string;
+  onSuccess?: () => void;
+  onError?: () => void;
+  onStart?: () => void;
 }
 
 export function UpdateImageSection({ 
   collectionAddress, 
-  currentImageUrl 
+  currentImageUrl,
+  onSuccess,
+  onError,
+  onStart
 }: UpdateImageSectionProps) {
   const [newImageUrl, setNewImageUrl] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
@@ -78,6 +84,7 @@ export function UpdateImageSection({
 
     try {
       setIsUpdating(true);
+      onStart?.();
       
       writeContract({
         address: collectionAddress as `0x${string}`,
@@ -94,6 +101,7 @@ export function UpdateImageSection({
         variant: "destructive",
       });
       setIsUpdating(false);
+      onError?.();
     }
   };
 
@@ -105,10 +113,13 @@ export function UpdateImageSection({
       title: "成功",
       description: "图片已成功更新！",
     });
+    // 调用成功回调
+    onSuccess?.();
   }
 
   if (writeError || receiptError) {
     setIsUpdating(false);
+    onError?.();
     toast({
       title: "错误",
       description: writeError?.message || receiptError?.message || "交易失败",
@@ -195,20 +206,6 @@ export function UpdateImageSection({
           重置
         </Button>
       </div>
-
-      {/* 当前图片显示 */}
-      {currentImageUrl && (
-        <div className="space-y-3">
-          <Label>当前图片</Label>
-          <div className="relative aspect-video w-full max-w-xs overflow-hidden rounded-lg border">
-            <img 
-              src={currentImageUrl} 
-              alt="Current collection image" 
-              className="object-cover w-full h-full"
-            />
-          </div>
-        </div>
-      )}
 
       {/* 图片预览对话框 */}
       <Dialog open={showImagePreview} onOpenChange={setShowImagePreview}>
