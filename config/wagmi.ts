@@ -1,5 +1,5 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
-import { sepolia, bsc } from 'viem/chains'
+import { sepolia, bsc,base } from 'viem/chains'
 import { http } from 'viem'
 import {
   metaMaskWallet,
@@ -19,10 +19,11 @@ if (!process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID) {
 export const config = getDefaultConfig({
   appName: 'NFT Maker',
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
-  chains: [bsc,sepolia],
+  chains: [base,sepolia,bsc],
   transports: {
+    [base.id]: http("https://mainnet.base.org"),
     [bsc.id]: http("https://bsc-dataseed.bnbchain.org"),
-    [sepolia.id]: http(),
+    [sepolia.id]: http()
   },
   wallets: [
     {

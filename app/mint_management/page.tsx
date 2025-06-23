@@ -4,11 +4,12 @@ import { DataTable } from "./data-table"
 import { columns } from "./columns"
 import { AddNFTDialog } from "./add-nft-dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { sepolia, bsc } from 'viem/chains'
+import { sepolia, bsc, base } from 'viem/chains'
 import { useState, useEffect, useCallback } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const chains = [
+  { id: base.id, name: "Base" },
   { id: bsc.id, name: "BSC" },
   { id: sepolia.id, name: "Sepolia" },
 ]
